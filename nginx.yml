@@ -46,6 +46,8 @@ instance_groups:
             error_log /var/vcap/sys/log/nginx/example.com-error.log;
             root /var/vcap/data/nginx/document_root;
             index index.shtml;
+            auth_basic "Private Property";
+            auth_basic_user_file /var/vcap/store/nginx/htpasswd;
           }
         }
       pre_start: |
@@ -65,6 +67,12 @@ instance_groups:
             </body></html>
         EOF
         fi
+
+        NGINX_DIR=/var/vcap/store/nginx
+        mkdir -p $NGINX_DIR
+        apt-get update && apt-get -y install apache2-utils
+        htpasswd -b -c $NGINX_DIR/htpasswd user password
+        chown -R vcap:vcap $NGINX_DIR
 update:
   canaries: 1
   max_in_flight: 1
